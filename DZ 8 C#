@@ -1,0 +1,489 @@
+
+namespace Classes
+{
+    class Group
+    {
+        private string groupName;
+        private string specialization;
+        private int courseNumber;
+        private List<Student> students;
+
+        // Конструктор по умолчанию
+        public Group() : this(new List<Student>(), "Название", "Название", 0)
+        {
+            Console.WriteLine("Основной конструктор!");
+        }
+
+        public Group(List<Student> students, string groupName, string specialization, int courseNumber)
+        {
+            SetGroupName(groupName);
+            SetSpecialization(specialization);
+            SetCourseNumber(courseNumber);
+            this.students = students;
+        }
+
+        public void SetGroupName(string groupName)
+        {
+            this.groupName = groupName;
+        }
+
+        public string GetLastName()
+        {
+            return groupName;
+        }
+
+        public void SetSpecialization(string specialization)
+        {
+            this.specialization = specialization;
+        }
+
+        public string GetSpecialization()
+        {
+            return specialization;
+        }
+
+        public void SetCourseNumber(int courseNumber)
+        {
+            this.courseNumber = courseNumber;
+        }
+
+        public int GetCourseNumber()
+        {
+            return courseNumber;
+        }
+
+        public void ShowGroupStudents()
+        {
+            Console.WriteLine("Group: " + groupName + ", Specialization: " + specialization);
+            for (int i = 0; i < students.Count; i++)
+            {
+                Console.WriteLine((i + 1).ToString() + ". " + students[i].GetLastName() + " " + students[i].GetFirstName());
+            }
+        }
+
+        public void AddStudent(Student student)
+        {
+            students.Add(student);
+        }
+
+        public void EditGroupData(string newGroupName, string newSpecialization, int newCourseNumber)
+        {
+            groupName = newGroupName;
+            specialization = newSpecialization;
+            courseNumber = newCourseNumber;
+        }
+
+        public void TransferStudent(Student student, Group newGroup)
+        {
+            students.Remove(student);
+            newGroup.AddStudent(student);
+        }
+
+        public void DismissWorstStudent()
+        {
+            if (students.Count == 0)
+            {
+                Console.WriteLine("Группа пустая, без студентов");
+                return;
+            }
+
+            Student worstStudent = students[0];
+            int minAverageGrade = GetAverageGrade(worstStudent);
+
+            foreach (var student in students)
+            {
+                int averageGrade = GetAverageGrade(student);
+                if (averageGrade < minAverageGrade)
+                {
+                    minAverageGrade = averageGrade;
+                    worstStudent = student;
+                }
+            }
+
+            students.Remove(worstStudent);
+            Console.WriteLine("Отчислен худший ученик: " + worstStudent.GetLastName() + " " + worstStudent.GetFirstName());
+        }
+
+        private int GetAverageGrade(Student student)
+        {
+            int total = 0;
+            int totalCount = student.GetGradesTests().Count + student.GetGradesCourseworks().Count + student.GetGradesExams().Count;
+
+            if (totalCount == 0)
+            {
+                return 0;
+            }
+
+            foreach (var grade in student.GetGradesTests())
+            {
+                total += grade;
+            }
+            foreach (var grade in student.GetGradesCourseworks())
+            {
+                total += grade;
+            }
+            foreach (var grade in student.GetGradesExams())
+            {
+                total += grade;
+            }
+            return total / totalCount;
+        }
+
+        // Перегрузка оператора ==
+        public static bool operator ==(Group group1, Group group2)
+        {
+            // Проверка на null для обоих объектов
+            if (ReferenceEquals(group1, group2))
+                return true;
+            // Проверка на null для одного из объектов
+            if (group1 is null || group2 is null)
+                return false;
+
+            // Сравнение по всем свойствам группы
+            return group1.groupName == group2.groupName &&
+                   group1.specialization == group2.specialization &&
+                   group1.courseNumber == group2.courseNumber &&
+                   group1.students == group2.students;
+        }
+
+        // Перегрузка оператора !=
+        public static bool operator !=(Group group1, Group group2)
+        {
+            return !(group1 == group2);
+        }
+
+        // Перегрузка индексатора
+        public Student this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= students.Count)
+                {
+                    throw new IndexOutOfRangeException($"Index {index} is out of range.");
+                }
+                return students[index];
+            }
+            set
+            {
+                if (index < 0 || index >= students.Count)
+                {
+                    throw new IndexOutOfRangeException($"Index {index} is out of range.");
+                }
+                students[index] = value;
+            }
+        }
+
+        //Добавление свойств
+        public string Name
+        {
+            get { return groupName; }
+            set { groupName = value; }
+        }
+
+        public int Count
+        {
+            get { return students.Count; }
+        }
+
+        public string Specialization
+        {
+            get { return specialization; }
+            set { specialization = value; }
+        }
+
+        public int Course
+        {
+            get { return courseNumber; }
+            set { courseNumber = value; }
+        }
+    }
+
+    class Student
+    {
+        private string lastName;
+        private string firstName;
+        private string patronymic;
+        private DateTime dateOfBirth;
+        private string homeAddress;
+        private string phoneNumber;
+        private List<int> gradesTests = new List<int>();
+        private List<int> gradesCourseworks = new List<int>();
+        private List<int> gradesExams = new List<int>();
+
+        public Student() : this("Иванов", "Иван") { }
+
+        public Student(string lastName, string firstName) : this(lastName, firstName, "", DateTime.Now, "Косая алея", "09305553344") { }
+
+        public Student(string lastName, string firstName, string patronymic, DateTime dateOfBirth, string homeAddress, string phoneNumber)
+        {
+            SetLastName(lastName);
+            SetFirstName(firstName);
+            SetPatronymic(patronymic);
+            SetDateOfBirth(dateOfBirth);
+            SetHomeAddress(homeAddress);
+            SetPhoneNumber(phoneNumber);
+            Console.WriteLine("Основной конструктор!");
+        }
+
+        public void SetLastName(string lastName)
+        {
+            this.lastName = lastName;
+        }
+
+        public void SetFirstName(string firstName)
+        {
+            this.firstName = firstName;
+        }
+
+        public void SetPatronymic(string patronymic)
+        {
+            this.patronymic = patronymic;
+        }
+
+        public void SetDateOfBirth(DateTime dateOfBirth)
+        {
+            this.dateOfBirth = dateOfBirth;
+        }
+
+        public void SetHomeAddress(string homeAddress)
+        {
+            if (!string.IsNullOrEmpty(homeAddress))
+                this.homeAddress = homeAddress;
+        }
+
+        public void SetPhoneNumber(string phoneNumber)
+        {
+            this.phoneNumber = phoneNumber;
+        }
+
+        public string GetLastName()
+        {
+            return lastName;
+        }
+
+        public string GetFirstName()
+        {
+            return firstName;
+        }
+
+        public string GetPatronymic()
+        {
+            return patronymic;
+        }
+
+        public DateTime GetDateOfBirth()
+        {
+            return dateOfBirth;
+        }
+
+        public string GetHomeAddress()
+        {
+            return homeAddress;
+        }
+
+        public string GetPhoneNumber()
+        {
+            return phoneNumber;
+        }
+
+        public List<int> GetGradesTests()
+        {
+            return gradesTests;
+        }
+
+        public List<int> GetGradesCourseworks()
+        {
+            return gradesCourseworks;
+        }
+
+        public List<int> GetGradesExams()
+        {
+            return gradesExams;
+        }
+
+        public void AddTestRate(int rate)
+        {
+            gradesTests.Add(rate);
+        }
+
+        public void AddCourseworkRate(int rate)
+        {
+            gradesCourseworks.Add(rate);
+        }
+
+        public void AddExamRate(int rate)
+        {
+            gradesExams.Add(rate);
+        }
+
+        public void DisplayStudentInfo()
+        {
+            Console.WriteLine("Student Information:");
+            Console.WriteLine("Name: " + lastName + " " + firstName + " " + patronymic);
+            Console.WriteLine("Date of Birth: " + dateOfBirth.ToShortDateString());
+            Console.WriteLine("Home Address: " + homeAddress);
+            Console.WriteLine("Phone Number: " + phoneNumber);
+            Console.WriteLine("Grades:");
+            Console.WriteLine("Tests:");
+            foreach (int grade in gradesTests)
+            {
+                Console.Write(grade + " ");
+            }
+            Console.WriteLine();
+            Console.WriteLine("Courseworks:");
+            foreach (int grade in gradesCourseworks)
+            {
+                Console.Write(grade + " ");
+            }
+            Console.WriteLine();
+            Console.WriteLine("Exams:");
+            foreach (int grade in gradesExams)
+            {
+                Console.Write(grade + " ");
+            }
+            Console.WriteLine();
+        }
+
+        // Перегрузка оператора true
+        public static bool operator true(Student student)
+        {
+            // Проверка на null и наличие хотя бы одного экземпляра в списке оценок
+            return student != null && (student.gradesTests.Count > 0 || student.gradesCourseworks.Count > 0 || student.gradesExams.Count > 0);
+        }
+
+        // Перегрузка оператора false
+        public static bool operator false(Student student)
+        {
+            // Проверка на null и отсутствие оценок в списке
+            return student == null || (student.gradesTests.Count == 0 && student.gradesCourseworks.Count == 0 && student.gradesExams.Count == 0);
+        }
+
+        // Перегрузка оператора ==
+        public static bool operator ==(Student student1, Student student2)
+        {
+            // Проверка на null для обоих объектов
+            if (ReferenceEquals(student1, student2))
+                return true;
+            // Проверка на null для одного из объектов
+            if (student1 is null || student2 is null)
+                return false;
+
+            // Сравнение по всем свойствам студента
+            return student1.lastName == student2.lastName &&
+                   student1.firstName == student2.firstName &&
+                   student1.patronymic == student2.patronymic &&
+                   student1.dateOfBirth == student2.dateOfBirth &&
+                   student1.homeAddress == student2.homeAddress &&
+                   student1.phoneNumber == student2.phoneNumber;
+        }
+
+        // Перегрузка оператора !=
+        public static bool operator !=(Student student1, Student student2)
+        {
+            return !(student1 == student2);
+        }
+
+        // Перегрузка оператора >
+        public static bool operator >(Student student1, Student student2)
+        {
+            // Сравнение по фамилии, если фамилии одинаковые, то по имени
+            if (student1.lastName != student2.lastName)
+                return string.Compare(student1.lastName, student2.lastName) > 0;
+            else
+                return string.Compare(student1.firstName, student2.firstName) > 0;
+        }
+
+        // Перегрузка оператора <
+        public static bool operator <(Student student1, Student student2)
+        {
+            // Сравнение по фамилии, если фамилии одинаковые, то по имени
+            if (student1.lastName != student2.lastName)
+                return string.Compare(student1.lastName, student2.lastName) < 0;
+            else
+                return string.Compare(student1.firstName, student2.firstName) < 0;
+        }
+
+        //Добавление свойств
+        public string Name
+        {
+            get { return firstName + " " + lastName; }
+        }
+
+        public int Age
+        {
+            get { return CalculateAge(); }
+        }
+
+        private int CalculateAge()
+        {
+            DateTime today = DateTime.Today;
+            int age = today.Year - dateOfBirth.Year;
+            if (dateOfBirth.Date > today.AddYears(-age)) age--;
+            return age;
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Student a = new Student();
+            Student b = new Student("Andrew", "Rossi");
+            Student c = new Student("Ivanov", "Ivan", "Ivanovich", new DateTime(1977, 5, 25), "Kosalea", "123456789");
+            c.AddTestRate(4);
+            c.AddCourseworkRate(5);
+            c.AddExamRate(3);
+            c.DisplayStudentInfo();
+
+            Group group = new Group();
+            group.AddStudent(a);
+            group.AddStudent(b);
+            group.AddStudent(c);
+
+            group.ShowGroupStudents();
+
+            group.DismissWorstStudent();
+            group.ShowGroupStudents();
+
+            // Создаем две группы с разными идентификаторами, специализациями и количеством студентов
+            Group group1 = new Group();
+            Group group2 = new Group();
+
+            // Добавляем несколько студентов в каждую группу
+            Student student1 = new Student("Иванов", "Иван");
+            Student student2 = new Student("Петров", "Петр");
+            group1.AddStudent(student1);
+            group2.AddStudent(student1); // Группы должны быть равны
+            group2.AddStudent(student2);
+
+            // Проверяем оператор ==
+            Console.WriteLine("Группы равны? " + (group1 == group2)); // Ожидаем true
+
+            // Проверяем оператор !=
+            Console.WriteLine("Группы не равны? " + (group1 != group2)); // Ожидаем false
+
+            // Проверяем доступ к студенту по индексу
+            Console.WriteLine("Студент в группе 2: " + group2[0].GetLastName()); // Ожидаем "Иванов"
+
+            // Изменяем студента через индексатор
+            group2[0] = new Student("Сидоров", "Сидор");
+
+            // Проверяем, что студент действительно изменен
+            Console.WriteLine("Студент в группе 2 после изменения: " + group2[0].GetLastName()); // Ожидаем "Сидоров"
+
+
+            // Пример использования новых свойств
+            Student student = new Student("Иванов", "Иван", "Иванович", new DateTime(1990, 5, 10), "Москва", "123456789");
+            Console.WriteLine("Студент: " + student.Name);
+            Console.WriteLine("Возраст: " + student.Age);
+
+            Group groupp = new Group();
+            groupp.Name = "Группа 1";
+            groupp.Specialization = "Информационные технологии";
+            groupp.Course = 2;
+            Console.WriteLine("Группа: " + groupp.Name);
+            Console.WriteLine("Специализация: " + groupp.Specialization);
+            Console.WriteLine("Курс: " + groupp.Course);
+        }
+    }
+}
